@@ -2,10 +2,9 @@ package com.reviewr.controller;
 
 import com.reviewr.model.Snippet;
 import com.reviewr.service.SnippetService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController @RequestMapping("/api/snippets")
 public class SnippetController {
@@ -18,5 +17,13 @@ public class SnippetController {
     @PostMapping
     public Snippet createSnippet(@RequestBody Snippet snippet) {
         return snippetService.saveSnippet(snippet);
+    }
+
+    @GetMapping
+    public List<Snippet> getSnippets(@RequestParam(name = "lang", required = false) String lang) {
+        if(lang != null) {
+            return snippetService.getSnippetByLanguage(lang);
+        }
+        return snippetService.getAllSnippets();
     }
 }
