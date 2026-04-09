@@ -1,5 +1,6 @@
 package com.reviewr.service;
 
+import com.reviewr.dto.ChangePasswordRequest;
 import com.reviewr.dto.LoginRequest;
 import com.reviewr.dto.RegisterRequest;
 import com.reviewr.model.User;
@@ -53,5 +54,21 @@ public class UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    // NEW: Change Password Logic
+    public void changePassword(String email, ChangePasswordRequest request) {
+        // 1. Find the user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // 2. Ask the Cryptographer if their "Current Password" is actually correct
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect current password");
+        }
+
+        // 3. Hash the brand new password and save it to the database
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

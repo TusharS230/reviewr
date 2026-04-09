@@ -1,0 +1,83 @@
+// ─────────────────────────────────────────
+// _auth.scss
+// ─────────────────────────────────────────
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg;
+  padding: $space-4;
+}
+
+.auth-card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $space-10;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: $shadow-lg;
+}
+
+.auth-card__logo {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: $color-text;
+  text-align: center;
+  margin-bottom: $space-1;
+
+  span { color: $color-accent; }
+}
+
+.auth-card__subtitle {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: $color-text-muted;
+  margin-bottom: $space-8;
+}
+
+.auth-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.auth-card__error {
+  font-size: 0.8125rem;
+  color: $color-danger;
+  text-align: center;
+  min-height: 1rem;
+}
+
+.auth-card__success {
+  font-size: 0.8125rem;
+  color: $color-success;
+  text-align: center;
+  min-height: 1rem;
+}
+
+.auth-card__footer {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: $color-text-muted;
+  margin-top: $space-5;
+
+  a {
+    color: $color-accent;
+    &:hover { color: $color-accent-hover; }
+  }
+}
+
+// Settings feedback
+.settings-msg {
+  font-size: 0.8125rem;
+  text-align: center;
+  min-height: 1rem;
+  margin-bottom: $space-3;
+
+  &--error   { color: $color-danger; }
+  &--success { color: $color-success; }
+}

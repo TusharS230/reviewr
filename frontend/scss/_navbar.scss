@@ -1,0 +1,39 @@
+// ─────────────────────────────────────────
+// _navbar.scss
+// ─────────────────────────────────────────
+
+.navbar {
+  height: $navbar-height;
+  background: $color-surface;
+  border-bottom: 1px solid $color-border;
+  padding: 0 $space-6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+.navbar__brand {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: $color-text;
+
+  span {
+    color: $color-accent;
+  }
+}
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.navbar__user {
+  font-size: 0.8125rem;
+  color: $color-text-secondary;
+  font-weight: 500;
+}

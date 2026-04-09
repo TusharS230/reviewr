@@ -1,0 +1,62 @@
+// ─────────────────────────────────────────
+// _card.scss
+// ─────────────────────────────────────────
+
+.card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color $transition, box-shadow $transition;
+
+  &:hover {
+    border-color: $color-text-muted;
+    box-shadow: $shadow-md;
+  }
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  padding: $space-4 $space-4 0;
+}
+
+.card__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-text;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card__code {
+  margin: $space-3 $space-4 0;
+  background: $color-bg;
+  border: 1px solid $color-border-muted;
+  border-radius: $radius;
+  padding: $space-3 $space-4;
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  line-height: 1.65;
+  color: #adbac7;
+  overflow-x: auto;
+  white-space: pre;
+  max-height: 160px;
+  overflow-y: auto;
+
+  // Subtle scrollbar
+  &::-webkit-scrollbar { width: 4px; height: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: $color-border; border-radius: 2px; }
+}
+
+.card__footer {
+  padding: $space-3 $space-4 $space-4;
+  margin-top: auto;
+}

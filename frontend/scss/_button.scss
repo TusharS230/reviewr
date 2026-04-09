@@ -1,0 +1,52 @@
+// ─────────────────────────────────────────
+// _button.scss
+// ─────────────────────────────────────────
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  padding: $space-2 $space-4;
+  border: none;
+  border-radius: $radius;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast, opacity $transition-fast;
+  white-space: nowrap;
+
+  &--primary {
+    background: $color-accent;
+    color: #0d1117;
+
+    &:hover { background: $color-accent-hover; }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $color-text-secondary;
+    border: 1px solid $color-border;
+
+    &:hover {
+      background: $color-surface-2;
+      color: $color-text;
+      border-color: $color-text-muted;
+    }
+  }
+
+  &--danger {
+    background: rgba($color-danger, 0.12);
+    color: $color-danger;
+    border: 1px solid rgba($color-danger, 0.25);
+
+    &:hover {
+      background: rgba($color-danger, 0.2);
+    }
+  }
+
+  &--full { width: 100%; }
+
+  &:active { opacity: 0.85; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}

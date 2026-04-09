@@ -1,0 +1,56 @@
+// ─────────────────────────────────────────
+// _sidebar.scss
+// ─────────────────────────────────────────
+
+.sidebar {
+  width: $sidebar-width;
+  flex-shrink: 0;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $space-2;
+  height: fit-content;
+}
+
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  border-radius: $radius;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: $color-text-secondary;
+  transition: background $transition-fast, color $transition-fast;
+  user-select: none;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity $transition-fast;
+  }
+
+  &:hover {
+    background: $color-accent-muted;
+    color: $color-accent;
+
+    svg { opacity: 1; }
+  }
+
+  &--active {
+    background: $color-accent-muted;
+    color: $color-accent;
+    font-weight: 600;
+
+    svg { opacity: 1; }
+  }
+}
+
+.sidebar__divider {
+  height: 1px;
+  background: $color-border-muted;
+  margin: $space-2 $space-3;
+}

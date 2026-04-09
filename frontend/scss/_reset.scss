@@ -1,0 +1,41 @@
+// ─────────────────────────────────────────
+// _reset.scss
+// ─────────────────────────────────────────
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: $font-sans;
+  background-color: $color-bg;
+  color: $color-text;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: $color-accent;
+  text-decoration: none;
+
+  &:hover { color: $color-accent-hover; }
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+ul { list-style: none; }
+
+img, svg { display: block; }
