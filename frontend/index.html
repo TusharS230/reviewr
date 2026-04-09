@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reviewer | Developer dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">🚀 Reviewr</div>
+      <div class="nav-user">Welcome, Tushar</div>
+    </nav>
+
+    <div class="container">
+      <aside class="sidebar">
+        <ul>
+          <li class="active">📚 All Snippets</li>
+          <li>⭐ My Reviews</li>
+          <li id="nav-add-btn">➕ Add Snippet</li>
+        </ul>
+      </aside>
+
+      <main class="content">
+        <header class="content-header">
+          <h1>Community Code Snippets</h1>
+          <p>Browse and review code from other developers.</p>
+        </header>
+
+        <div id="snippets-grid" class="grid">
+          <div class="loading-state">
+            <p>Connecting to Spring Boot...</p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="add-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add New Snippet</h2>
+          <span class="close-btn" id="close-modal">&times;</span>
+        </div>
+        <form id="add-snippet-form">
+          <div class="form-group">
+            <label>Snippet Title</label>
+            <input
+              type="text"
+              id="input-title"
+              required
+              placeholder="e.g., Reverse a String"
+            />
+          </div>
+          <div class="form-group">
+            <label>Language</label>
+            <select id="input-language" required>
+              <option value="Java">Java</option>
+              <option value="JavaScript">JavaScript</option>
+              <option value="Python">Python</option>
+              <option value="C++">C++</option>
+              <option value="SQL">SQL</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Code Content</label>
+            <textarea
+              id="input-content"
+              rows="6"
+              required
+              placeholder="Paste your code here..."
+            ></textarea>
+          </div>
+          <button type="submit" class="btn">Save to Database</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="reviews-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Snippet Reviews</h2>
+          <span class="close-btn" id="close-reviews-modal">&times;</span>
+        </div>
+
+        <div id="reviews-container">
+          <p>Loading reviews...</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
