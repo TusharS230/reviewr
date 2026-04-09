@@ -1,0 +1,27 @@
+// ─────────────────────────────────────────
+// _badge.scss
+// ─────────────────────────────────────────
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &--lang {
+    background: $color-accent-muted;
+    color: $color-accent;
+    border: 1px solid rgba($color-accent, 0.2);
+  }
+
+  &--rating {
+    background: rgba($color-warning, 0.12);
+    color: $color-warning;
+    border: 1px solid rgba($color-warning, 0.2);
+  }
+}

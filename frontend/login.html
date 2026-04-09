@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reviewr — Sign In</title>
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      (function() {
+        var t = localStorage.getItem('reviewr_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+  </head>
+  <body class="auth-page">
+
+    <div class="auth-theme-toggle">
+      <button class="btn-theme" id="theme-toggle-btn" aria-label="Toggle theme"></button>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-card__logo">Reviewr</div>
+      <p class="auth-card__subtitle">Sign in to your account</p>
+
+      <form id="login-form" class="auth-card__form">
+        <input class="form-control" type="email"    id="email"    placeholder="Email address" required autocomplete="email" />
+        <div class="pw-field">
+          <input class="form-control" type="password" id="password" placeholder="Password" required autocomplete="current-password" />
+          <button type="button" class="pw-toggle" aria-label="Toggle password visibility"></button>
+        </div>
+        <p id="error-message" class="auth-card__error"></p>
+        <button type="submit" class="btn btn--primary btn--full">Sign In</button>
+      </form>
+
+      <p class="auth-card__footer">
+        Don't have an account? <a href="register.html">Create one</a>
+      </p>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+    <script type="module">
+      import { initTheme, initThemeToggle } from './js/ui.js';
+      initTheme();
+      document.addEventListener('DOMContentLoaded', () => initThemeToggle('theme-toggle-btn'));
+    </script>
+  </body>
+</html>

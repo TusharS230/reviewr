@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile - Reviewr</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f3f4f6;
+      }
+      .settings-container {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+      }
+      .settings-container h2 {
+        margin-top: 0;
+        text-align: center;
+        color: var(--primary-color);
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .form-group input {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+      }
+      .message {
+        text-align: center;
+        font-size: 0.875rem;
+        min-height: 20px;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="settings-container">
+      <h2>Account Settings</h2>
+      <p style="text-align: center; color: #6b7280; margin-bottom: 1.5rem">
+        Change your password
+      </p>
+
+      <form id="password-form">
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" id="current-pwd" required />
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="new-pwd" required />
+        </div>
+        <div id="status-message" class="message"></div>
+        <button type="submit" class="btn" style="width: 100%">
+          Update Password
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem">
+        <a
+          href="index.html"
+          style="color: var(--primary-color); text-decoration: none"
+          >&larr; Back to Dashboard</a
+        >
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("password-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const token = localStorage.getItem("reviewr_jwt");
+          if (!token) {
+            window.location.href = "login.html";
+            return;
+          }
+
+          const currentPassword = document.getElementById("current-pwd").value;
+          const newPassword = document.getElementById("new-pwd").value;
+          const msgDiv = document.getElementById("status-message");
+
+          try {
+            const response = await fetch(
+              "http://localhost:8080/api/users/change-password",
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ currentPassword, newPassword }),
+              },
+            );
+
+            if (response.ok) {
+              msgDiv.style.color = "#10B981"; // Green success
+              msgDiv.innerText = "Password updated successfully!";
+              document.getElementById("password-form").reset();
+            } else {
+              msgDiv.style.color = "#EF4444"; // Red error
+              msgDiv.innerText = "Incorrect current password.";
+            }
+          } catch (error) {
+            msgDiv.style.color = "#EF4444";
+            msgDiv.innerText = "An error occurred connecting to the server.";
+          }
+        });
+    </script>
+  </body>
+</html>

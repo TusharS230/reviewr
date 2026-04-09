@@ -1,0 +1,28 @@
+// ─────────────────────────────────────────
+// _layout.scss
+// ─────────────────────────────────────────
+
+.l-container {
+  display: flex;
+  max-width: $content-max;
+  margin: $space-6 auto;
+  gap: $space-6;
+  padding: 0 $space-6;
+}
+
+.l-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.l-content__header {
+  margin-bottom: $space-6;
+
+  h1 { margin-bottom: $space-1; }
+}
+
+.l-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: $space-5;
+}

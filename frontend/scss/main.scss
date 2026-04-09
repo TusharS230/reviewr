@@ -1,0 +1,32 @@
+// ─────────────────────────────────────────
+// main.scss  —  Entry point
+// Import order matters: tokens → base → layout → components → pages → utils
+// ─────────────────────────────────────────
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+// 1. Tokens
+@import 'variables';
+
+// 2. Base
+@import 'reset';
+@import 'typography';
+
+// 3. Layout
+@import 'layout';
+
+// 4. Components
+@import 'navbar';
+@import 'sidebar';
+@import 'button';
+@import 'badge';
+@import 'card';
+@import 'modal';
+@import 'form';
+@import 'review';
+
+// 5. Pages
+@import 'auth';
+
+// 6. Utilities (last — highest specificity wins)
+@import 'utilities';

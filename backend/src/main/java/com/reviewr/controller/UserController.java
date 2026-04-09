@@ -1,11 +1,14 @@
 package com.reviewr.controller;
 
+import com.reviewr.dto.ChangePasswordRequest;
 import com.reviewr.dto.LoginRequest;
 import com.reviewr.dto.RegisterRequest;
 import com.reviewr.model.User;
 import com.reviewr.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -42,5 +45,19 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         String token = userService.loginUser(request);
         return ResponseEntity.ok(Collections.singletonMap("token", token));
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        // 1. Ask the Bouncer who is currently logged in
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        String loggedInEmail = authentication.getName();
+
+        // 2. Pass the email and the passwords to the service
+        userService.changePassword(loggedInEmail, request);
+
+        // 3. Return a success message
+        return ResponseEntity.ok(Collections.singletonMap("message", "Password updated successfully"));
     }
 }
