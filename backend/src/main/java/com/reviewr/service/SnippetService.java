@@ -3,7 +3,6 @@ package com.reviewr.service;
 import com.reviewr.model.Snippet;
 import com.reviewr.model.User;
 import com.reviewr.repository.SnippetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,5 +37,13 @@ public class SnippetService {
 
     public List<Snippet> getAllSnippets() {
         return snippetRepository.findAll();
+    }
+
+    public List<Snippet> getSnippetsByUserId(Long userId) {
+        return snippetRepository.findByUserId(userId);
+    }
+
+    public List<Snippet> getSnippetsByUserIdAndLanguage(Long userId, String language) {
+        return snippetRepository.findByUserIdAndLanguage(userId, language);
     }
 }

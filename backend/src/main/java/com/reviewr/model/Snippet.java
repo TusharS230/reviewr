@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import java.time.LocalDateTime;
 
 @Entity @Getter @Setter
 public class Snippet {
@@ -17,6 +19,10 @@ public class Snippet {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @ManyToOne @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
