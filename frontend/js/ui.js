@@ -92,13 +92,14 @@ export function initMobileSidebar() {
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 
-export function initSidebar({ onAllSnippets, onMyReviews, onAddSnippet, onSettings }) {
+export function initSidebar({ onAllSnippets, onMySnippets, onMyReviews, onAddSnippet, onSettings }) {
   const allBtn      = document.getElementById('nav-all-snippets');
+  const mySnipBtn   = document.getElementById('nav-my-snippets');
   const myBtn       = document.getElementById('nav-my-reviews');
   const addBtn      = document.getElementById('nav-add-btn');
   const settingsBtn = document.getElementById('nav-settings');
 
-  const navItems = [allBtn, myBtn, settingsBtn];
+  const navItems = [allBtn, mySnipBtn, myBtn, settingsBtn];
   let prevActive = allBtn;
 
   function setActive(el) {
@@ -106,28 +107,19 @@ export function initSidebar({ onAllSnippets, onMyReviews, onAddSnippet, onSettin
     el?.classList.add('sidebar__item--active');
   }
 
-  function restorePrev() {
-    setActive(prevActive);
-  }
+  function restorePrev() { setActive(prevActive); }
 
   allBtn?.addEventListener('click', () => {
-    prevActive = allBtn;
-    setActive(allBtn);
-    onAllSnippets?.();
+    prevActive = allBtn; setActive(allBtn); onAllSnippets?.();
   });
-
+  mySnipBtn?.addEventListener('click', () => {
+    prevActive = mySnipBtn; setActive(mySnipBtn); onMySnippets?.();
+  });
   myBtn?.addEventListener('click', () => {
-    prevActive = myBtn;
-    setActive(myBtn);
-    onMyReviews?.();
+    prevActive = myBtn; setActive(myBtn); onMyReviews?.();
   });
-
-  addBtn?.addEventListener('click', () => { onAddSnippet?.(); });
-
-  settingsBtn?.addEventListener('click', () => {
-    setActive(settingsBtn);
-    onSettings?.();
-  });
+  addBtn?.addEventListener('click',      () => { onAddSnippet?.(); });
+  settingsBtn?.addEventListener('click', () => { setActive(settingsBtn); onSettings?.(); });
 
   return { restorePrev };
 }

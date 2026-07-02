@@ -1,6 +1,7 @@
 // js/settings.js — settings modal (change password)
 
-import { API_BASE, getToken, handleAuthError } from './config.js';
+import API_BASE_URL from './config.js';
+import { getToken, handleAuthError } from './config.js';
 
 export function initSettingsModal(onClose) {
   const modal    = document.getElementById('settings-modal');
@@ -9,6 +10,7 @@ export function initSettingsModal(onClose) {
   const msgEl    = document.getElementById('settings-message');
 
   const open  = () => {
+    if (!getToken()) { window.location.href = 'login.html'; return; }
     form.reset();
     msgEl.textContent = '';
     msgEl.className   = 'settings-msg';
@@ -47,7 +49,7 @@ export function initSettingsModal(onClose) {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/users/change-password`, {
+      const res = await fetch(`${API_BASE_URL}/users/change-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ currentPassword, newPassword }),

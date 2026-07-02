@@ -1,8 +1,9 @@
 // js/app.js — main entry point
 
-import { getToken, API_BASE, escapeHtml, handleAuthError, initPasswordToggles } from './config.js';
+import API_BASE_URL from './config.js';
+import { getToken, escapeHtml, handleAuthError, initPasswordToggles } from './config.js';
 import { initTheme, initThemeToggle, initNavbar, initSidebar, initMobileSidebar } from './ui.js';
-import { loadSnippets, initAddSnippetModal } from './snippets.js';
+import { loadSnippets, loadMySnippets, initAddSnippetModal } from './snippets.js';
 import { initReviewsModal, openReviews } from './reviews.js';
 import { initSettingsModal } from './settings.js';
 
@@ -17,19 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileSidebar();
   initPasswordToggles();
 
-  const { open: openAddModal }      = initAddSnippetModal(loadSnippets);
+  const { open: openAddModal } = initAddSnippetModal(showAllSnippets);
 
   const { restorePrev } = initSidebar({
-    onAllSnippets: loadSnippets,
-    onMyReviews:   loadMyReviews,
-    onAddSnippet:  openAddModal,
-    onSettings:    () => openSettingsModal(),
+    onAllSnippets:  showAllSnippets,
+    onMySnippets:   loadMySnippetsView,
+    onMyReviews:    loadMyReviews,
+    onAddSnippet:   openAddModal,
+    onSettings:     () => openSettingsModal(),
   });
 
   const { open: openSettingsModal } = initSettingsModal(restorePrev);
 
   initReviewsModal();
-  loadSnippets();
+  initFilterBar();
+  showAllSnippets();
 
   document.getElementById('snippets-grid').addEventListener('click', e => {
     const reviewBtn = e.target.closest('[data-snippet-id]:not([data-view-code])');
@@ -40,6 +43,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initCodeViewer();
 });
+
+// current view tracker — used by filter bar to re-run the right loader
+let currentView = 'all'; // 'all' | 'mine'
+
+function showFilterBar(show) {
+  const bar = document.getElementById('filter-bar');
+  if (bar) bar.style.display = show ? '' : 'none';
+}
+
+function initFilterBar() {
+  const langEl  = document.getElementById('filter-language');
+  const sortEl  = document.getElementById('filter-sort');
+  const resetEl = document.getElementById('filter-reset');
+
+  const apply = () => { currentView === 'mine' ? loadMySnippets() : loadSnippets(); };
+
+  langEl?.addEventListener('change', apply);
+  sortEl?.addEventListener('change', apply);
+  resetEl?.addEventListener('click', () => {
+    if (langEl) langEl.value = '';
+    if (sortEl) sortEl.value = 'newest';
+    apply();
+  });
+}
+
+function showAllSnippets() {
+  currentView = 'all';
+  document.getElementById('page-title').textContent    = 'Community Snippets';
+  document.getElementById('page-subtitle').textContent = 'Browse and review code shared by other developers.';
+  const allBtn = document.getElementById('nav-all-snippets');
+  document.querySelectorAll('.sidebar__item').forEach(b => b.classList.remove('sidebar__item--active'));
+  allBtn?.classList.add('sidebar__item--active');
+  showFilterBar(true);
+  loadSnippets();
+}
+
+function loadMySnippetsView() {
+  currentView = 'mine';
+  document.getElementById('page-title').textContent    = 'My Snippets';
+  document.getElementById('page-subtitle').textContent = 'Code snippets you have shared.';
+  const myBtn = document.getElementById('nav-my-snippets');
+  document.querySelectorAll('.sidebar__item').forEach(b => b.classList.remove('sidebar__item--active'));
+  myBtn?.classList.add('sidebar__item--active');
+  showFilterBar(true);
+  loadMySnippets();
+}
 
 function initCodeViewer() {
   const modal    = document.getElementById('code-modal');
@@ -73,10 +122,11 @@ async function loadMyReviews() {
   const grid = document.getElementById('snippets-grid');
   document.getElementById('page-title').textContent    = 'My Reviews';
   document.getElementById('page-subtitle').textContent = 'Reviews you have left on snippets.';
+  showFilterBar(false);
   grid.innerHTML = `<div class="state-empty"><p>Loading your reviews...</p></div>`;
 
   try {
-    const res = await fetch(`${API_BASE}/reviews/my-reviews`, {
+    const res = await fetch(`${API_BASE_URL}/reviews/my-reviews`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

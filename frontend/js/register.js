@@ -1,6 +1,7 @@
 // js/register.js — registration page logic
 
-import { API_BASE, initPasswordToggles } from './config.js';
+import API_BASE_URL from './config.js';
+import { initPasswordToggles } from './config.js';
 
 document.addEventListener('DOMContentLoaded', () => initPasswordToggles());
 
@@ -16,7 +17,7 @@ document.getElementById('register-form').addEventListener('submit', async e => {
   messageEl.className   = 'auth-card__error';
 
   try {
-    const res = await fetch(`${API_BASE}/users/register`, {
+    const res = await fetch(`${API_BASE_URL}/users/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password }),

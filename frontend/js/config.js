@@ -1,6 +1,11 @@
 // js/config.js — shared constants and utilities
 
-export const API_BASE = 'http://localhost:8080/api';
+const API_BASE_URL =
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8080/api'
+    : 'https://your-backend-service.onrender.com/api';
+
+export default API_BASE_URL;
 
 export function getToken() {
   return localStorage.getItem('reviewr_jwt');

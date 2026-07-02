@@ -1,6 +1,7 @@
 // js/reviews.js — review fetch, render, post
 
-import { API_BASE, getToken, escapeHtml, handleAuthError } from './config.js';
+import API_BASE_URL from './config.js';
+import { getToken, escapeHtml, handleAuthError } from './config.js';
 
 export function initReviewsModal() {
   const modal    = document.getElementById('reviews-modal');
@@ -24,7 +25,7 @@ export function initReviewsModal() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/reviews`, {
+      const res = await fetch(`${API_BASE_URL}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
@@ -49,7 +50,7 @@ async function loadReviews(id) {
   container.innerHTML = `<div class="state-empty"><p>Loading reviews...</p></div>`;
 
   try {
-    const res = await fetch(`${API_BASE}/reviews/snippet/${id}`);
+    const res = await fetch(`${API_BASE_URL}/reviews/snippet/${id}`);
     if (!res.ok) throw new Error(`${res.status}`);
 
     const reviews = await res.json();

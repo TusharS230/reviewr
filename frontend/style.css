@@ -192,6 +192,21 @@ small { font-size: 0.75rem; color: var(--text-3); }
 .l-content__header { margin-bottom: 1.25rem; }
 .l-content__header h1 { margin-bottom: 0.2rem; }
 
+.content-header__top { margin-bottom: 0.875rem; }
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.filter-bar__select {
+  width: auto;
+  min-width: 130px;
+  padding: 0.375rem 1.75rem 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+}
+
 .l-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));

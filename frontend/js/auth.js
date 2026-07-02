@@ -1,6 +1,7 @@
 // js/auth.js — login page logic
 
-import { API_BASE, initPasswordToggles } from './config.js';
+import API_BASE_URL from './config.js';
+import { initPasswordToggles } from './config.js';
 
 document.addEventListener('DOMContentLoaded', () => initPasswordToggles());
 
@@ -14,7 +15,7 @@ document.getElementById('login-form').addEventListener('submit', async e => {
   errorEl.textContent = '';
 
   try {
-    const res = await fetch(`${API_BASE}/users/login`, {
+    const res = await fetch(`${API_BASE_URL}/users/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
