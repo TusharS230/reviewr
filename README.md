@@ -12,7 +12,7 @@
 - **🔐 User Authentication:** Secure login and registration using JWT (JSON Web Tokens).
 - **📝 Snippet Management:** Create, view, and manage code snippets across multiple languages (Java, JavaScript, Python, C++, SQL).
 - **⭐ Review System:** Leave 1-5 star ratings and comments on community snippets.
-- **🎨 Modern UI/UX:** A responsive, vanilla HTML/CSS/JS frontend featuring a seamless Dark/Light mode toggle.
+- **🎨 Modern UI/UX:** A responsive, dark-themed frontend built with vanilla HTML, CSS and JavaScript.
 - **🔍 Filtering & Sorting:** Easily filter snippets by programming language and sort them by newest, oldest, or alphabetical order.
 
 ---
@@ -50,7 +50,7 @@ CREATE DATABASE reviewr_db;
    ```bash
    cd backend
    ```
-2. Update your database credentials in `src/main/resources/application.properties` if necessary.
+2. The defaults in `src/main/resources/application.properties` expect a local PostgreSQL with user `postgres`. To use other values, set the `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD` environment variables instead of editing the file.
 3. Run the application:
    ```bash
    mvn spring-boot:run
@@ -75,7 +75,7 @@ This project is fully containerized and ready for cloud deployment.
 The backend includes a `Dockerfile`. To deploy on Render:
 1. Create a New Web Service connected to this repository.
 2. Set the **Root Directory** to `backend`.
-3. Set the Environment Variables (`SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`).
+3. Set the Environment Variables (`SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, and `JWT_SECRET`, a random string of at least 32 characters).
 
 ### Frontend (Netlify/Vercel)
 The frontend consists of static files. 

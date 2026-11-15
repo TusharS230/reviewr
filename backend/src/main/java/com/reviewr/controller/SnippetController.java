@@ -2,10 +2,11 @@ package com.reviewr.controller;
 
 import com.reviewr.model.Snippet;
 import com.reviewr.model.User;
-import com.reviewr.repository.UserRepository;
 import com.reviewr.service.SnippetService;
+import com.reviewr.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,38 +17,33 @@ import java.util.List;
 public class SnippetController {
 
     private final SnippetService snippetService;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public SnippetController(SnippetService snippetService, UserRepository userRepository) {
+    public SnippetController(SnippetService snippetService, UserService userService) {
         this.snippetService = snippetService;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @PostMapping
-    public Snippet createSnippet(@RequestBody Snippet snippet) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInEmail = authentication.getName();
-        User currentUser = userRepository.findByEmail(loggedInEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        snippet.setUser(currentUser);
-        return snippetService.saveSnippet(snippet);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Snippet createSnippet(@Valid @RequestBody Snippet snippet, Authentication authentication) {
+        User currentUser = userService.getUserByEmail(authentication.getName());
+        return snippetService.createSnippet(snippet, currentUser);
     }
 
     @GetMapping
     public List<Snippet> getSnippets(@RequestParam(name = "lang", required = false) String lang) {
-        if (lang != null) {
+        if (lang != null && !lang.isBlank()) {
             return snippetService.getSnippetByLanguage(lang);
         }
         return snippetService.getAllSnippets();
     }
 
     @GetMapping("/my-snippets")
-    public List<Snippet> getMySnippets(@RequestParam(name = "lang", required = false) String lang) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInEmail = authentication.getName();
-        User currentUser = userRepository.findByEmail(loggedInEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (lang != null) {
+    public List<Snippet> getMySnippets(@RequestParam(name = "lang", required = false) String lang,
+                                       Authentication authentication) {
+        User currentUser = userService.getUserByEmail(authentication.getName());
+        if (lang != null && !lang.isBlank()) {
             return snippetService.getSnippetsByUserIdAndLanguage(currentUser.getId(), lang);
         }
         return snippetService.getSnippetsByUserId(currentUser.getId());

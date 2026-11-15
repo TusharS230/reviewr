@@ -7,8 +7,17 @@ const API_BASE_URL =
 
 export default API_BASE_URL;
 
+// Returns the saved token, or null if there is none or it has expired
 export function getToken() {
-  return localStorage.getItem('reviewr_jwt');
+  const token = localStorage.getItem('reviewr_jwt');
+  if (!token) return null;
+
+  const payload = decodeJwtPayload(token);
+  if (!payload || (payload.exp && payload.exp * 1000 <= Date.now())) {
+    clearToken();
+    return null;
+  }
+  return token;
 }
 
 export function clearToken() {
@@ -17,21 +26,33 @@ export function clearToken() {
 
 export function decodeJwtPayload(token) {
   try {
-    return JSON.parse(atob(token.split('.')[1]));
+    const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(part));
   } catch {
     return null;
   }
 }
 
+// Escapes text for HTML. Quotes matter too, because some values go inside attributes.
 export function escapeHtml(str) {
-  return String(str)
+  return String(str ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
+// Reads the error message the backend sends, with a fallback
+export async function readError(res, fallback = 'Something went wrong. Please try again.') {
+  const data = await res.json().catch(() => ({}));
+  return data.message || fallback;
+}
+
+// 401 means the token is missing or expired, so send the user to sign in.
+// 403 only means "not allowed" and should not log anyone out.
 export function handleAuthError(status) {
-  if (status === 401 || status === 403) {
+  if (status === 401) {
     clearToken();
     window.location.href = 'login.html';
     return true;

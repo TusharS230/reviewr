@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +19,7 @@ public class Review {
     private Long id;
 
     @NotBlank(message = "Comment cannot be empty or just spaces")
+    @Size(max = 255, message = "Comment can be at most 255 characters")
     private String comment;
 
     @Min(value = 1, message = "Rating must be at least 1")
@@ -27,6 +30,7 @@ public class Review {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull(message = "Snippet is required")
     @ManyToOne
     @JoinColumn(name = "snippet_id", nullable = false)
     private Snippet snippet;

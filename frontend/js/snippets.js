@@ -1,7 +1,7 @@
 // js/snippets.js — snippet fetch, render, post
 
 import API_BASE_URL from './config.js';
-import { getToken, escapeHtml, handleAuthError } from './config.js';
+import { getToken, escapeHtml, handleAuthError, readError } from './config.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ function renderGrid(snippets, emptyMsg = 'No snippets found.') {
   grid.innerHTML = '';
 
   if (!snippets.length) {
-    grid.innerHTML = `<div class="state-empty"><p class="state-empty__title">${emptyMsg}</p></div>`;
+    grid.innerHTML = `<div class="state-empty"><p class="state-empty__title">${escapeHtml(emptyMsg)}</p></div>`;
     return;
   }
 
@@ -52,7 +52,7 @@ export async function loadSnippets() {
     document.getElementById('snippets-grid').innerHTML = `
       <div class="state-empty">
         <p class="state-empty__title">Connection failed</p>
-        <p>Could not reach the backend. Is Spring Boot running on port 8080?</p>
+        <p>Could not load snippets. Please try again in a moment.</p>
       </div>`;
   }
 }
@@ -73,7 +73,10 @@ export async function loadMySnippets() {
 
   try {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) { handleAuthError(res.status); throw new Error(`${res.status}`); }
+    if (!res.ok) {
+      if (handleAuthError(res.status)) return;
+      throw new Error(`${res.status}`);
+    }
 
     const snippets = sortSnippets(await res.json(), sort);
     renderGrid(snippets, "You haven't added any snippets yet.");
@@ -117,12 +120,18 @@ export function initAddSnippetModal(onSuccess) {
   const modal    = document.getElementById('add-modal');
   const closeBtn = document.getElementById('close-add-modal');
   const form     = document.getElementById('add-snippet-form');
+  const msgEl    = document.getElementById('add-snippet-message');
+  const showMsg  = text => {
+    if (!msgEl) return;
+    msgEl.className   = 'settings-msg settings-msg--error';
+    msgEl.textContent = text;
+  };
 
   const open  = () => {
     if (!getToken()) { window.location.href = 'login.html'; return; }
     modal.classList.remove('u-hidden');
   };
-  const close = () => { modal.classList.add('u-hidden'); form.reset(); };
+  const close = () => { modal.classList.add('u-hidden'); form.reset(); showMsg(''); };
 
   closeBtn?.addEventListener('click', close);
   modal?.addEventListener('click', e => { if (e.target === modal) close(); });
@@ -137,6 +146,16 @@ export function initAddSnippetModal(onSuccess) {
       language:      document.getElementById('input-language').value,
       content:       document.getElementById('input-content').value,
     };
+    payload.snippet_title = payload.snippet_title.trim();
+
+    if (!payload.snippet_title || !payload.content.trim()) {
+      showMsg('Please add a title and some code.');
+      return;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    showMsg('');
 
     try {
       const res = await fetch(`${API_BASE_URL}/snippets`, {
@@ -146,9 +165,12 @@ export function initAddSnippetModal(onSuccess) {
       });
 
       if (res.ok) { close(); onSuccess?.(); }
-      else if (!handleAuthError(res.status)) throw new Error(`${res.status}`);
+      else if (!handleAuthError(res.status)) showMsg(await readError(res, 'Could not save the snippet.'));
     } catch (err) {
       console.error('Save snippet failed:', err);
+      showMsg('Could not reach the server. Please try again.');
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 

@@ -3,47 +3,37 @@ package com.reviewr.controller;
 import com.reviewr.dto.ReviewDTO;
 import com.reviewr.model.Review;
 import com.reviewr.model.User;
-import com.reviewr.repository.UserRepository;
 import com.reviewr.service.ReviewService;
+import com.reviewr.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
     private final ReviewService reviewService;
-    private final UserRepository userRepository; // 1. Add the UserRepository
+    private final UserService userService;
 
-    // 2. Inject BOTH into the constructor
-    public ReviewController(ReviewService reviewService, UserRepository userRepository) {
+    public ReviewController(ReviewService reviewService, UserService userService) {
         this.reviewService = reviewService;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @PostMapping
-    public Review createReview(@Valid @RequestBody Review review) {
-        // A. Ask the Bouncer who is currently holding the VIP ticket
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInEmail = authentication.getName(); // Pulls the email from the JWT
-
-        // B. Find that user in the database
-        User currentUser = userRepository.findByEmail(loggedInEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // C. Attach the user to the review so it knows who wrote it!
-        review.setUser(currentUser);
-
-        // D. Save it
-        return reviewService.saveReview(review);
+    @ResponseStatus(HttpStatus.CREATED)
+    public ReviewDTO createReview(@Valid @RequestBody Review review, Authentication authentication) {
+        // The author always comes from the JWT, never from the request body
+        User currentUser = userService.getUserByEmail(authentication.getName());
+        return reviewService.createReview(review, currentUser);
     }
-
-    // --- The rest stays exactly the same ---
 
     @GetMapping("/snippet/{snippetId}")
     public List<ReviewDTO> getReviewsForSnippet(@PathVariable Long snippetId) {
@@ -51,9 +41,10 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteReview(@PathVariable Long id) {
-        reviewService.deleteReview(id);
-        return ResponseEntity.ok("Review " + id + " deleted successfully!");
+    public ResponseEntity<Map<String, String>> deleteReview(@PathVariable Long id, Authentication authentication) {
+        User currentUser = userService.getUserByEmail(authentication.getName());
+        reviewService.deleteReview(id, currentUser);
+        return ResponseEntity.ok(Collections.singletonMap("message", "Review deleted"));
     }
 
     @GetMapping("/user/{userId}")
@@ -61,18 +52,9 @@ public class ReviewController {
         return reviewService.getReviewsByUserId(userId);
     }
 
-    // THE NEW "MY REVIEWS" ENDPOINT
     @GetMapping("/my-reviews")
-    public List<ReviewDTO> getMyReviews() {
-        // 1. Ask the Bouncer who is holding the VIP ticket
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInEmail = authentication.getName();
-
-        // 2. Find that user in the database
-        User currentUser = userRepository.findByEmail(loggedInEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // 3. Use the existing service to get reviews for this specific user
+    public List<ReviewDTO> getMyReviews(Authentication authentication) {
+        User currentUser = userService.getUserByEmail(authentication.getName());
         return reviewService.getReviewsByUserId(currentUser.getId());
     }
 }

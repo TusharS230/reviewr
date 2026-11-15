@@ -13,20 +13,25 @@ import java.util.List;
 public class SnippetService {
 
     private final SnippetRepository snippetRepository;
-    private final UserService userService;
 
-    public SnippetService(SnippetRepository snippetRepository, UserService userService) {
+    public SnippetService(SnippetRepository snippetRepository) {
         this.snippetRepository = snippetRepository;
-        this.userService = userService;
     }
 
-    public Snippet saveSnippet(Snippet snippet) {
-        User author = userService.getUserById(snippet.getUser().getId());
+    public Snippet createSnippet(Snippet snippet, User author) {
+        // Ignore any id sent by the client, otherwise a POST could overwrite someone else's snippet
+        snippet.setId(null);
+        snippet.setCreatedAt(null);
+        snippet.setTitle(snippet.getTitle().trim());
+        snippet.setLanguage(snippet.getLanguage().trim());
         snippet.setUser(author);
         return snippetRepository.save(snippet);
     }
 
     public Snippet getSnippetById(Long id) {
+        if (id == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Snippet id is required");
+        }
         return snippetRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Snippet not found"));
     }

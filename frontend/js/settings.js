@@ -1,7 +1,7 @@
 // js/settings.js — settings modal (change password)
 
 import API_BASE_URL from './config.js';
-import { getToken, handleAuthError } from './config.js';
+import { getToken, handleAuthError, readError } from './config.js';
 
 export function initSettingsModal(onClose) {
   const modal    = document.getElementById('settings-modal');
@@ -42,6 +42,12 @@ export function initSettingsModal(onClose) {
       return;
     }
 
+    if (newPassword === currentPassword) {
+      msgEl.className   = 'settings-msg settings-msg--error';
+      msgEl.textContent = 'New password must be different from the current one.';
+      return;
+    }
+
     if (newPassword.length < 6) {
       msgEl.className   = 'settings-msg settings-msg--error';
       msgEl.textContent = 'New password must be at least 6 characters.';
@@ -60,13 +66,13 @@ export function initSettingsModal(onClose) {
         msgEl.textContent = 'Password updated successfully.';
         form.reset();
       } else if (!handleAuthError(res.status)) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || `Error ${res.status}`);
+        msgEl.className   = 'settings-msg settings-msg--error';
+        msgEl.textContent = await readError(res, 'Failed to update password. Please try again.');
       }
     } catch (err) {
       console.error('Change password failed:', err);
       msgEl.className   = 'settings-msg settings-msg--error';
-      msgEl.textContent = err.message || 'Failed to update password. Please try again.';
+      msgEl.textContent = 'Could not reach the server. Please try again.';
     }
   });
 

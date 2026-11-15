@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Locale;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -24,28 +26,28 @@ public class UserService {
     }
 
     public User registerUser(RegisterRequest request) {
-        if(userRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "User with this email already exists"
-            );
+        String email = normalizeEmail(request.getEmail());
+
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An account with this email already exists");
         }
 
         User newUser = new User();
-        newUser.setUsername(request.getUsername());
-        newUser.setEmail(request.getEmail());
-
-        // THE MAGIC: Scramble the password before saving!
+        newUser.setUsername(request.getUsername().trim());
+        newUser.setEmail(email);
         newUser.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return userRepository.save(newUser);
     }
 
     public String loginUser(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        // Same message for "no such user" and "wrong password",
+        // so nobody can find out which emails are registered.
+        User user = userRepository.findByEmailIgnoreCase(normalizeEmail(request.getEmail()))
+                .orElseThrow(this::invalidLogin);
 
-        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw invalidLogin();
         }
 
         return jwtUtil.generateToken(user.getEmail());
@@ -56,19 +58,30 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
-    // NEW: Change Password Logic
-    public void changePassword(String email, ChangePasswordRequest request) {
-        // 1. Find the user
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please sign in again"));
+    }
 
-        // 2. Ask the Cryptographer if their "Current Password" is actually correct
+    public void changePassword(String email, ChangePasswordRequest request) {
+        User user = getUserByEmail(email);
+
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect current password");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
+        }
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be different from the current one");
         }
 
-        // 3. Hash the brand new password and save it to the database
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    private ResponseStatusException invalidLogin() {
+        return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 }

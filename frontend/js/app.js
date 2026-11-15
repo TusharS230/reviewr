@@ -2,18 +2,14 @@
 
 import API_BASE_URL from './config.js';
 import { getToken, escapeHtml, handleAuthError, initPasswordToggles } from './config.js';
-import { initTheme, initThemeToggle, initNavbar, initSidebar, initMobileSidebar } from './ui.js';
+import { initNavbar, initSidebar, initMobileSidebar } from './ui.js';
 import { loadSnippets, loadMySnippets, initAddSnippetModal } from './snippets.js';
 import { initReviewsModal, openReviews } from './reviews.js';
 import { initSettingsModal } from './settings.js';
 
-// Apply theme before paint to avoid flash
-initTheme();
-
 window.openReviews = openReviews;
 
 document.addEventListener('DOMContentLoaded', () => {
-  initThemeToggle('theme-toggle-btn');
   initNavbar();
   initMobileSidebar();
   initPasswordToggles();
@@ -101,10 +97,13 @@ function initCodeViewer() {
 
   copyBtn?.addEventListener('click', () => {
     const text = document.getElementById('code-modal-content').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      copyBtn.textContent = 'Copied!';
+    const done = label => {
+      copyBtn.textContent = label;
       setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
-    });
+    };
+    // navigator.clipboard only exists on https or localhost
+    if (!navigator.clipboard) { done('Copy failed'); return; }
+    navigator.clipboard.writeText(text).then(() => done('Copied!'), () => done('Copy failed'));
   });
 }
 
@@ -130,7 +129,10 @@ async function loadMyReviews() {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!res.ok) { handleAuthError(res.status); throw new Error(`${res.status}`); }
+    if (!res.ok) {
+      if (handleAuthError(res.status)) return;
+      throw new Error(`${res.status}`);
+    }
 
     const reviews = await res.json();
     grid.innerHTML = '';
@@ -150,7 +152,7 @@ async function loadMyReviews() {
       card.innerHTML = `
         <div class="card__header">
           <span class="card__title">${escapeHtml(r.snippetTitle || 'Untitled Snippet')}</span>
-          <span class="badge badge--rating">${r.rating} / 5</span>
+          <span class="badge badge--rating">${Number(r.rating)} / 5</span>
         </div>
         <div class="card__footer">
           <p class="review-card__comment">${escapeHtml(r.comment)}</p>

@@ -1,4 +1,6 @@
 package com.reviewr.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -20,10 +22,11 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-//    @Column(nullable = false)
+    // Never send the password hash back in any JSON response
+    @JsonIgnore
     private String password;
 
-    @OneToMany(mappedBy="user")
+    @OneToMany(mappedBy = "user")
     @JsonManagedReference
     private List<Snippet> snippets;
 }

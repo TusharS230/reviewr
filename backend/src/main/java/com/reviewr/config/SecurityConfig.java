@@ -4,6 +4,7 @@ import com.reviewr.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,21 +32,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs
-                .cors(Customizer.withDefaults()) // Keep your @CrossOrigin annotations working
+                .csrf(csrf -> csrf.disable()) // stateless JWT API, no cookies
+                .cors(Customizer.withDefaults()) // uses the @CrossOrigin settings on the controllers
 
-                // THE NEW RULES:
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/register").permitAll() // Anyone can login/register
-                        .requestMatchers(HttpMethod.GET, "/api/snippets/**").permitAll() // Anyone can read snippets
-                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll() // Anyone can read reviews
-                        .anyRequest().authenticated() // ANY other request (like POSTing a snippet) requires a Token!
+                        .requestMatchers("/error").permitAll() // let Spring show real error codes
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS preflight
+                        .requestMatchers("/api/users/login", "/api/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/snippets/my-snippets").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/my-reviews").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/snippets/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .anyRequest().authenticated()
                 )
 
-                // Tell Spring we are using JWTs, not old-school Server Sessions
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Missing or expired token -> 401 with a JSON body (Spring's default is an empty 403)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.getWriter().write(
+                            "{\"status\":401,\"message\":\"Please sign in to continue\",\"timestamp\":"
+                                    + System.currentTimeMillis() + "}");
+                }))
 
-                // Put our custom Bouncer in front of the door
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

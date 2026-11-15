@@ -5,12 +5,10 @@ import com.reviewr.model.Review;
 import com.reviewr.model.Snippet;
 import com.reviewr.model.User;
 import com.reviewr.repository.ReviewRepository;
-import com.reviewr.repository.SnippetRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,54 +25,46 @@ public class ReviewService {
         this.snippetService = snippetService;
     }
 
-    public Review saveReview(Review review) {
-        User author = userService.getUserById(review.getUser().getId());
+    public ReviewDTO createReview(Review review, User author) {
         Snippet targetSnippet = snippetService.getSnippetById(review.getSnippet().getId());
 
+        // Ignore any id sent by the client, otherwise a POST could overwrite someone else's review
+        review.setId(null);
+        review.setComment(review.getComment().trim());
         review.setUser(author);
         review.setSnippet(targetSnippet);
 
-        return reviewRepository.save(review);
+        return toDto(reviewRepository.save(review));
     }
 
     public List<ReviewDTO> getReviewsBySnippetId(Long snippetId) {
         snippetService.getSnippetById(snippetId);
-        List<Review> rawReviews = reviewRepository.findBySnippetId(snippetId);
-        List<ReviewDTO> cleanReviews = new ArrayList<>();
-
-        for(Review review : rawReviews) {
-            ReviewDTO dto = new ReviewDTO();
-            dto.setId(review.getId());
-            dto.setComment(review.getComment());
-            dto.setRating(review.getRating());
-            dto.setAuthorName(review.getUser().getUsername());
-            dto.setSnippetTitle(review.getSnippet().getTitle());
-            cleanReviews.add(dto);
-        }
-        return cleanReviews;
-    }
-
-    public void deleteReview(Long id) {
-        if(!reviewRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found with id " + id);
-        }
-        reviewRepository.deleteById(id);
+        return reviewRepository.findBySnippetId(snippetId).stream().map(this::toDto).toList();
     }
 
     public List<ReviewDTO> getReviewsByUserId(Long userId) {
         userService.getUserById(userId);
-        List<Review> rawReviews = reviewRepository.findByUserId(userId);
-        List<ReviewDTO> cleanReviews = new ArrayList<>();
+        return reviewRepository.findByUserId(userId).stream().map(this::toDto).toList();
+    }
 
-        for(Review raw : rawReviews) {
-            ReviewDTO dto = new ReviewDTO();
-            dto.setId(raw.getId());
-            dto.setSnippetTitle(raw.getSnippet().getTitle());
-            dto.setComment(raw.getComment());
-            dto.setRating(raw.getRating());
-            dto.setAuthorName(raw.getUser().getUsername());
-            cleanReviews.add(dto);
+    // Only the person who wrote a review can delete it
+    public void deleteReview(Long id, User currentUser) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        if (!review.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own reviews");
         }
-        return cleanReviews;
+        reviewRepository.delete(review);
+    }
+
+    private ReviewDTO toDto(Review review) {
+        ReviewDTO dto = new ReviewDTO();
+        dto.setId(review.getId());
+        dto.setComment(review.getComment());
+        dto.setRating(review.getRating());
+        dto.setAuthorName(review.getUser().getUsername());
+        dto.setSnippetTitle(review.getSnippet().getTitle());
+        return dto;
     }
 }

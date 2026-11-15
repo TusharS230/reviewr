@@ -1,7 +1,10 @@
 package com.reviewr.model;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,10 +16,15 @@ public class Snippet {
     private Long id;
 
     @JsonProperty("snippet_title")
+    @NotBlank(message = "Title cannot be empty")
+    @Size(max = 150, message = "Title can be at most 150 characters")
     private String title;
 
+    @NotBlank(message = "Language is required")
+    @Size(max = 30, message = "Language name is too long")
     private String language;
 
+    @NotBlank(message = "Code cannot be empty")
     @Column(columnDefinition = "TEXT")
     private String content;
 

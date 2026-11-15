@@ -1,17 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reviewr — Dashboard</title>
     <link rel="stylesheet" href="style.css" />
-    <script>
-      // Apply theme before render to prevent flash
-      (function() {
-        var t = localStorage.getItem('reviewr_theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-      })();
-    </script>
   </head>
   <body>
 
@@ -27,7 +20,6 @@
         <div class="navbar__brand">Reviewr</div>
       </div>
       <div class="navbar__right">
-        <button class="btn-theme" id="theme-toggle-btn" aria-label="Toggle theme"></button>
         <div class="navbar__actions" id="navbar-actions"></div>
       </div>
     </nav>
@@ -115,7 +107,7 @@
           <form id="add-snippet-form">
             <div class="form-group">
               <label class="form-label" for="input-title">Title</label>
-              <input class="form-control" type="text" id="input-title" required placeholder="e.g. Binary Search in Java" />
+              <input class="form-control" type="text" id="input-title" required maxlength="150" placeholder="e.g. Binary Search in Java" />
             </div>
             <div class="form-group">
               <label class="form-label" for="input-language">Language</label>
@@ -131,6 +123,7 @@
               <label class="form-label" for="input-content">Code</label>
               <textarea class="form-control form-control--mono" id="input-content" rows="8" required placeholder="Paste your code here..."></textarea>
             </div>
+            <p id="add-snippet-message" class="settings-msg"></p>
             <div class="form-group">
               <button type="submit" class="btn btn--primary btn--full">Save Snippet</button>
             </div>
@@ -162,8 +155,9 @@
             </div>
             <div class="form-group">
               <label class="form-label" for="review-comment">Comment</label>
-              <textarea class="form-control" id="review-comment" rows="3" required placeholder="Share your thoughts on this snippet..."></textarea>
+              <textarea class="form-control" id="review-comment" rows="3" required maxlength="255" placeholder="Share your thoughts on this snippet..."></textarea>
             </div>
+            <p id="review-message" class="settings-msg"></p>
             <div class="form-group">
               <button type="submit" class="btn btn--primary btn--full">Submit Review</button>
             </div>
@@ -195,7 +189,7 @@
             <div class="form-group">
               <label class="form-label" for="new-password">New Password</label>
               <div class="pw-field">
-                <input class="form-control" type="password" id="new-password" required placeholder="Enter new password" autocomplete="new-password" />
+                <input class="form-control" type="password" id="new-password" required minlength="6" maxlength="100" placeholder="Enter new password" autocomplete="new-password" />
                 <button type="button" class="pw-toggle" aria-label="Toggle password visibility"></button>
               </div>
             </div>
