@@ -1,5 +1,20 @@
-# Root .gitignore
+# Build output
 backend/target/
-frontend/node_modules/
-.idea/
+target/
 *.class
+*.jar
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local secrets
+.env
+
+# Frontend tooling
+node_modules/

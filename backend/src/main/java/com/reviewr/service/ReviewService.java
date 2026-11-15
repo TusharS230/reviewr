@@ -65,6 +65,7 @@ public class ReviewService {
         dto.setRating(review.getRating());
         dto.setAuthorName(review.getUser().getUsername());
         dto.setSnippetTitle(review.getSnippet().getTitle());
+        dto.setSnippetId(review.getSnippet().getId());
         return dto;
     }
 }

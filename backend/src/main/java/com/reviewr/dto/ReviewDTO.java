@@ -11,4 +11,5 @@ public class ReviewDTO {
     private int rating;
     private String authorName;
     private String snippetTitle;
+    private Long snippetId;
 }

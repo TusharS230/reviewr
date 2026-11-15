@@ -327,6 +327,7 @@ small { font-size: 0.75rem; color: var(--text-3); }
   max-height: 150px;
   overflow-y: auto;
 }
+.card__meta { padding: 0 0.875rem 0.5rem; font-size: 0.75rem; color: var(--text-3); }
 .card__footer { padding: 0.625rem 0.875rem 0.875rem; margin-top: auto; }
 .card__footer--row { display: flex; gap: 0.5rem; }
 .card__footer--row .btn { flex: 1; }
@@ -474,6 +475,8 @@ select.form-control {
 /* ─────────────────────────────────────────
    REVIEW CARD
 ───────────────────────────────────────── */
+.reviews-summary { font-size: 0.8125rem; color: var(--text-2); margin-bottom: 0.625rem; }
+.reviews-summary:empty { display: none; }
 .review-card { background: var(--bg-3); border: 1px solid var(--border-muted); border-radius: 4px; padding: 0.875rem; }
 .review-card + .review-card { margin-top: 0.625rem; }
 .review-card__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.375rem; }

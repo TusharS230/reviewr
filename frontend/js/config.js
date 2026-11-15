@@ -43,6 +43,20 @@ export function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// "just now", "5 min ago", "3 days ago", or a date for anything older than a month
+export function timeAgo(value) {
+  // The backend sends UTC times without a zone ("2026-11-15T10:00:00"), so add the Z
+  const text = typeof value === 'string' && !/[zZ]|[+-]\d\d:?\d\d$/.test(value) ? `${value}Z` : value;
+  const date = new Date(text);
+  if (!value || isNaN(date)) return '';
+  const secs = Math.max(0, (Date.now() - date.getTime()) / 1000);
+  if (secs < 60)     return 'just now';
+  if (secs < 3600)   return `${Math.floor(secs / 60)} min ago`;
+  if (secs < 86400)  { const h = Math.floor(secs / 3600);  return `${h} hour${h > 1 ? 's' : ''} ago`; }
+  if (secs < 2592000){ const d = Math.floor(secs / 86400); return `${d} day${d > 1 ? 's' : ''} ago`; }
+  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 // Reads the error message the backend sends, with a fallback
 export async function readError(res, fallback = 'Something went wrong. Please try again.') {
   const data = await res.json().catch(() => ({}));

@@ -1,7 +1,7 @@
 // js/snippets.js — snippet fetch, render, post
 
 import API_BASE_URL from './config.js';
-import { getToken, escapeHtml, handleAuthError, readError } from './config.js';
+import { getToken, escapeHtml, handleAuthError, readError, timeAgo } from './config.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -96,6 +96,8 @@ function buildCard(snippet) {
   const title   = escapeHtml(snippet.snippet_title || snippet.title || 'Untitled');
   const lang    = escapeHtml(snippet.language);
   const content = escapeHtml(snippet.content);
+  const meta    = [snippet.authorName && `by ${snippet.authorName}`, timeAgo(snippet.createdAt)]
+    .filter(Boolean).join(' · ');
 
   const card = document.createElement('div');
   card.className = 'card';
@@ -104,11 +106,12 @@ function buildCard(snippet) {
       <span class="card__title">${title}</span>
       <span class="badge badge--lang">${lang}</span>
     </div>
+    ${meta ? `<p class="card__meta">${escapeHtml(meta)}</p>` : ''}
     <pre class="card__code">${content}</pre>
     <div class="card__footer card__footer--row">
       <button class="btn btn--ghost" data-view-code data-snippet-id="${snippet.id}"
         data-title="${title}" data-lang="${lang}" data-content="${content}">View Code</button>
-      <button class="btn btn--ghost" data-snippet-id="${snippet.id}">View Reviews</button>
+      <button class="btn btn--ghost" data-snippet-id="${snippet.id}" data-title="${title}">View Reviews</button>
     </div>
   `;
   return card;

@@ -35,4 +35,10 @@ public class Snippet {
     @ManyToOne @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     private User user;
+
+    // Shown on snippet cards as "by <username>"
+    @JsonProperty(value = "authorName", access = JsonProperty.Access.READ_ONLY)
+    public String getAuthorName() {
+        return user == null ? null : user.getUsername();
+    }
 }

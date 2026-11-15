@@ -54,7 +54,9 @@ export function initReviewsModal() {
   });
 }
 
-export async function openReviews(id) {
+export async function openReviews(id, title = '') {
+  document.getElementById('reviews-modal-title').textContent = title ? `Reviews: ${title}` : 'Reviews';
+  document.getElementById('reviews-summary').textContent = '';
   document.getElementById('add-review-form').reset();
   document.getElementById('review-snippet-id').value = id;
   const msgEl = document.getElementById('review-message');
@@ -74,10 +76,15 @@ async function loadReviews(id) {
     const reviews = await res.json();
     container.innerHTML = '';
 
+    const summary = document.getElementById('reviews-summary');
     if (!reviews.length) {
-      container.innerHTML = `<div class="state-empty"><p>No reviews yet for this snippet.</p></div>`;
+      summary.textContent = '';
+      container.innerHTML = `<div class="state-empty"><p>No reviews yet. Be the first to leave one.</p></div>`;
       return;
     }
+
+    const avg = reviews.reduce((sum, r) => sum + Number(r.rating), 0) / reviews.length;
+    summary.textContent = `Average ${avg.toFixed(1)} / 5 from ${reviews.length} review${reviews.length > 1 ? 's' : ''}`;
 
     reviews.forEach(r => {
       const el = document.createElement('div');

@@ -1,88 +1,121 @@
-# Reviewr — Community Code Snippets
+# Reviewr
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Java](https://img.shields.io/badge/Java-Spring_Boot-orange)
-![Vanilla JS](https://img.shields.io/badge/Vanilla-JS-yellow)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
+Reviewr is a small full-stack app where developers share code snippets and review each other's code. You post a snippet, other people rate it from 1 to 5 and leave a comment, and you can see what everyone thought.
 
-**Reviewr** is a full-stack web application designed for developers to share, browse, and review code snippets. It provides a collaborative environment where users can post their code solutions and receive feedback and ratings from the community.
+Backend: Java 17, Spring Boot, Spring Security with JWT, PostgreSQL.
+Frontend: plain HTML, CSS and JavaScript (ES modules), no framework.
 
-## ✨ Features
+## Features
 
-- **🔐 User Authentication:** Secure login and registration using JWT (JSON Web Tokens).
-- **📝 Snippet Management:** Create, view, and manage code snippets across multiple languages (Java, JavaScript, Python, C++, SQL).
-- **⭐ Review System:** Leave 1-5 star ratings and comments on community snippets.
-- **🎨 Modern UI/UX:** A responsive, dark-themed frontend built with vanilla HTML, CSS and JavaScript.
-- **🔍 Filtering & Sorting:** Easily filter snippets by programming language and sort them by newest, oldest, or alphabetical order.
+- Sign up, sign in and change your password. Passwords are hashed with BCrypt and logins use JWT tokens.
+- Browse every snippet without an account. Each card shows the author and when it was posted.
+- Filter snippets by language (Java, JavaScript, Python, C++, SQL) and sort by newest, oldest or title.
+- Open any snippet in a full code viewer and copy it with one click.
+- Rate and review snippets. Each snippet shows its average rating and all its reviews.
+- "My Snippets" and "My Reviews" pages. You can delete your own reviews and nobody else's.
+- Clear error messages on every form, and Escape closes any open window.
 
----
+## Project structure
 
-## 🛠️ Technology Stack
+```
+reviewr/
+├── backend/                     Spring Boot API
+│   └── src/main/java/com/reviewr/
+│       ├── config/              security setup, user loading
+│       ├── controller/          REST endpoints
+│       ├── dto/                 request and response objects
+│       ├── exception/           one place that turns errors into JSON
+│       ├── model/               JPA entities: User, Snippet, Review
+│       ├── repository/          Spring Data repositories
+│       ├── security/            JWT creation and the request filter
+│       └── service/             business rules
+└── frontend/                    static site
+    ├── index.html, login.html, register.html
+    ├── style.css
+    └── js/                      one file per feature
+```
 
-**Backend:**
-- Java & Spring Boot
-- Spring Security (JWT Authentication)
-- Spring Data JPA (Hibernate)
-- PostgreSQL
+## Running it locally
 
-**Frontend:**
-- HTML5, CSS3 (SCSS)
-- Vanilla JavaScript (ES6 Modules)
-- Fetch API for RESTful integration
+You need JDK 17 or newer, Maven (or the included `mvnw`) and PostgreSQL.
 
----
+**1. Create the database**
 
-## 🚀 Local Development Setup
-
-### Prerequisites
-- JDK 17+
-- PostgreSQL
-- Maven
-
-### 1. Database Setup
-Create a local PostgreSQL database named `reviewr_db`:
 ```sql
 CREATE DATABASE reviewr_db;
 ```
 
-### 2. Backend Setup
-1. Navigate to the `backend` directory:
-   ```bash
-   cd backend
-   ```
-2. The defaults in `src/main/resources/application.properties` expect a local PostgreSQL with user `postgres`. To use other values, set the `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD` environment variables instead of editing the file.
-3. Run the application:
-   ```bash
-   mvn spring-boot:run
-   ```
-   The backend will start on `http://localhost:8080`.
+**2. Start the backend**
 
-### 3. Frontend Setup
-1. Navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
-2. Open `index.html` using a local web server (e.g., VS Code Live Server). 
-3. The frontend is configured to automatically point to `http://localhost:8080/api` when run locally via `config.js`.
+```bash
+cd backend
+./mvnw spring-boot:run        # on Windows: mvnw.cmd spring-boot:run
+```
 
----
+By default it connects to `localhost:5432/reviewr_db` as `postgres`. If your database uses other details, set the environment variables below instead of editing the code. The tables are created automatically on first start. The API runs on `http://localhost:8080`.
 
-## ☁️ Deployment
+**3. Open the frontend**
 
-This project is fully containerized and ready for cloud deployment.
+Serve the `frontend` folder with any static server, for example the VS Code Live Server extension, or:
 
-### Backend (Render)
-The backend includes a `Dockerfile`. To deploy on Render:
-1. Create a New Web Service connected to this repository.
-2. Set the **Root Directory** to `backend`.
-3. Set the Environment Variables (`SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, and `JWT_SECRET`, a random string of at least 32 characters).
+```bash
+cd frontend
+python -m http.server 5500
+```
 
-### Frontend (Netlify/Vercel)
-The frontend consists of static files. 
-1. Update `API_BASE_URL` in `frontend/js/config.js` to point to your live backend URL.
-2. Deploy the `frontend` folder to Netlify or Vercel as a static site.
+Then open `http://localhost:5500`. When the page runs on `localhost`, it talks to `http://localhost:8080/api` automatically (see `js/config.js`).
 
----
+## Configuration
 
-## 📄 License
-This project is open-source and available under the MIT License.
+| Variable | What it is | Default |
+|---|---|---|
+| `SPRING_DATASOURCE_URL` | PostgreSQL connection URL | `jdbc:postgresql://localhost:5432/reviewr_db` |
+| `SPRING_DATASOURCE_USERNAME` | database user | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD` | database password | `postgre` |
+| `JWT_SECRET` | key used to sign login tokens, at least 32 characters | a development-only value |
+| `JWT_EXPIRATION_MS` | how long a login lasts | `86400000` (24 hours) |
+
+Always set your own `JWT_SECRET` in production. The default is only there so the app starts on your machine.
+
+## API
+
+All endpoints start with `/api`. Endpoints marked "token" need an `Authorization: Bearer <token>` header.
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/users/register` | public | create an account |
+| POST | `/users/login` | public | returns `{ "token": "..." }` |
+| PUT | `/users/change-password` | token | change your password |
+| GET | `/users/{id}` | token | public profile (id and username) |
+| GET | `/snippets?lang=Java` | public | all snippets, optionally by language |
+| GET | `/snippets/my-snippets` | token | your snippets |
+| POST | `/snippets` | token | create a snippet |
+| GET | `/reviews/snippet/{id}` | public | reviews for one snippet |
+| GET | `/reviews/my-reviews` | token | reviews you wrote |
+| POST | `/reviews` | token | add a review |
+| DELETE | `/reviews/{id}` | token | delete one of your own reviews |
+
+Errors always come back as JSON in the same shape:
+
+```json
+{ "status": 400, "message": "Comment cannot be empty or just spaces", "timestamp": 1763200000000 }
+```
+
+## Tests
+
+```bash
+cd backend
+./mvnw test
+```
+
+The unit tests in `src/test/java/com/reviewr/service` cover the security rules: only the author can delete a review, a new post can't overwrite an existing one, and login gives the same answer for an unknown email and a wrong password. `ReviewrApplicationTests` starts the full app, so it needs PostgreSQL running.
+
+## Deployment
+
+**Backend (Render).** Create a Web Service from this repository, set the root directory to `backend` and use the included `Dockerfile`. Add the environment variables from the table above, including your own `JWT_SECRET`.
+
+**Frontend (Netlify or Vercel).** Deploy the `frontend` folder as a static site. If your backend URL is different, change the production URL in `frontend/js/config.js`.
+
+## License
+
+MIT

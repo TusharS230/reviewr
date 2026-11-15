@@ -1,7 +1,7 @@
 // js/app.js — main entry point
 
 import API_BASE_URL from './config.js';
-import { getToken, escapeHtml, handleAuthError, initPasswordToggles } from './config.js';
+import { getToken, escapeHtml, handleAuthError, readError, initPasswordToggles } from './config.js';
 import { initNavbar, initSidebar, initMobileSidebar } from './ui.js';
 import { loadSnippets, loadMySnippets, initAddSnippetModal } from './snippets.js';
 import { initReviewsModal, openReviews } from './reviews.js';
@@ -33,8 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('snippets-grid').addEventListener('click', e => {
     const reviewBtn = e.target.closest('[data-snippet-id]:not([data-view-code])');
     const codeBtn   = e.target.closest('[data-view-code]');
-    if (reviewBtn) openReviews(reviewBtn.dataset.snippetId);
+    const deleteBtn = e.target.closest('[data-delete-review]');
+    if (deleteBtn) { deleteReview(deleteBtn); return; }
+    if (reviewBtn) openReviews(reviewBtn.dataset.snippetId, reviewBtn.dataset.title || '');
     if (codeBtn)   openCodeViewer(codeBtn);
+  });
+
+  // Escape closes whichever modal is open (through its own close button, so its cleanup runs)
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const open = [...document.querySelectorAll('.modal')].find(m => !m.classList.contains('u-hidden'));
+    open?.querySelector('.modal__close')?.click();
   });
 
   initCodeViewer();
@@ -114,6 +123,30 @@ function openCodeViewer(btn) {
   document.getElementById('code-modal').classList.remove('u-hidden');
 }
 
+async function deleteReview(btn) {
+  if (!confirm('Delete this review? This cannot be undone.')) return;
+
+  const token = getToken();
+  if (!token) { window.location.href = 'login.html'; return; }
+
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API_BASE_URL}/reviews/${btn.dataset.deleteReview}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      btn.closest('.card').remove();
+      if (!document.querySelector('#snippets-grid .card')) loadMyReviews();
+      return;
+    }
+    if (!handleAuthError(res.status)) alert(await readError(res, 'Could not delete the review.'));
+  } catch {
+    alert('Could not reach the server. Please try again.');
+  }
+  btn.disabled = false;
+}
+
 async function loadMyReviews() {
   const token = getToken();
   if (!token) { window.location.href = 'login.html'; return; }
@@ -149,13 +182,18 @@ async function loadMyReviews() {
     reviews.forEach(r => {
       const card = document.createElement('div');
       card.className = 'card';
+      const title = escapeHtml(r.snippetTitle || 'Untitled Snippet');
       card.innerHTML = `
         <div class="card__header">
-          <span class="card__title">${escapeHtml(r.snippetTitle || 'Untitled Snippet')}</span>
+          <span class="card__title">${title}</span>
           <span class="badge badge--rating">${Number(r.rating)} / 5</span>
         </div>
         <div class="card__footer">
           <p class="review-card__comment">${escapeHtml(r.comment)}</p>
+        </div>
+        <div class="card__footer card__footer--row">
+          ${r.snippetId ? `<button class="btn btn--ghost" data-snippet-id="${Number(r.snippetId)}" data-title="${title}">Open Snippet</button>` : ''}
+          <button class="btn btn--danger" data-delete-review="${Number(r.id)}">Delete</button>
         </div>
       `;
       grid.appendChild(card);
