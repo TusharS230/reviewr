@@ -2,6 +2,10 @@
 
 Reviewr is a small full-stack app where developers share code snippets and review each other's code. You post a snippet, other people rate it from 1 to 5 and leave a comment, and you can see what everyone thought.
 
+**Live demo:** https://regal-rugelach-30835c.netlify.app/
+
+The backend runs on Render's free plan, so the first request after a quiet period can take up to a minute while the server wakes up.
+
 Backend: Java 17, Spring Boot, Spring Security with JWT, PostgreSQL.
 Frontend: plain HTML, CSS and JavaScript (ES modules), no framework.
 
